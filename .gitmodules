@@ -1,0 +1,3 @@
+[submodule "KdTree"]
+	path = KdTree
+	url = git@github.com:codeandcats/KdTree.git

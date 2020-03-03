@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+using KdTree;
+using KdTree.Math;
+
 public class PrismManager : MonoBehaviour
 {
     public int prismCount = 10;
@@ -19,6 +22,8 @@ public class PrismManager : MonoBehaviour
     private Dictionary<Prism, bool> prismColliding = new Dictionary<Prism, bool>();
 
     private const float UPDATE_RATE = 0.5f;
+
+    private KdTree.KdTree<float, int> ktree = null;
 
     #region Unity Functions
 
@@ -67,6 +72,7 @@ public class PrismManager : MonoBehaviour
         DrawPrismRegion();
         DrawPrismWireFrames();
         DrawBoundingBoxes();
+        DrawTree();
 
 #if UNITY_EDITOR
         if (Application.isFocused)
@@ -108,21 +114,36 @@ public class PrismManager : MonoBehaviour
 
     private IEnumerable<PrismCollision> PotentialCollisions()
     {
-        for (int i = 0; i < prisms.Count; i++)
-            for (int j = i + 1; j < prisms.Count; j++)
-            {
-                if (prisms[i].points.Length == 0 || prisms[j].points.Length == 0)
-                    continue;
-                var prismI = prisms[i];
-                var prismTransformI = prismObjects[i].transform;
-                var prismPointsI = prismI.points.Select(p => prismTransformI.position + Quaternion.AngleAxis(prismTransformI.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformI.localScale.x, 0, p.z * prismTransformI.localScale.z)).ToArray();
-                var bboxI = BoundingBox(prismPointsI);
+        ktree = new KdTree<float, int>(2, new FloatMath());
 
+        for (int i = 0; i < prisms.Count; i++)
+        {
+            var prism = prisms[i];
+            var prismTransform = prismObjects[i].transform;
+            var prismPoints = prism.points.Select(p => prismTransform.position + Quaternion.AngleAxis(prismTransform.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransform.localScale.x, 0, p.z * prismTransform.localScale.z)).ToArray();
+            foreach (var point in prismPoints)
+                ktree.Add(new[] { point.x, point.z }, i);
+        }
+
+        for (int i = 0; i < prisms.Count; i++)
+        {
+            if (prisms[i].points.Length == 0)
+                continue;
+            var prismI = prisms[i];
+            var prismTransformI = prismObjects[i].transform;
+            var prismPointsI = prismI.points.Select(p => prismTransformI.position + Quaternion.AngleAxis(prismTransformI.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformI.localScale.x, 0, p.z * prismTransformI.localScale.z)).ToArray();
+            var bboxI = BoundingBox(prismPointsI);
+            float radius = Vector3.Distance(bboxI[0], bboxI[1]) / 2;
+            print(radius);
+            float[] position = new float[] { prismTransformI.position.x, prismTransformI.position.z };
+            foreach (KdTree.KdTreeNode<float, int> node in ktree.RadialSearch(position, radius))
+            {
+                int j = node.Value;
+                if (j == i) continue;
                 var prismJ = prisms[j];
                 var prismTransformJ = prismObjects[j].transform;
                 var prismPointsJ = prismJ.points.Select(p => prismTransformJ.position + Quaternion.AngleAxis(prismTransformJ.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformJ.localScale.x, 0, p.z * prismTransformJ.localScale.z)).ToArray();
                 var bboxJ = BoundingBox(prismPointsJ);
-
                 if (AreBoxesColliding(bboxI, bboxJ))
                 {
                     var checkPrisms = new PrismCollision();
@@ -132,6 +153,7 @@ public class PrismManager : MonoBehaviour
                     yield return checkPrisms;
                 }
             }
+        }
         yield break;
     }
 
@@ -168,6 +190,32 @@ public class PrismManager : MonoBehaviour
     #endregion
 
     #region Visualization Functions
+
+    private void DrawTree(float r = 0, float g = 0, float b = 1, float a = 1)
+    {
+        if (ktree == null) return;
+        var wireFrameColor = new Color(r, g, b, a);
+        var yMin = -prismRegionRadiusY;
+        var yMax = prismRegionRadiusY;
+
+        foreach (KdTree.KdTreeNode<float, int> node in ktree.AsEnumerable())
+        {
+            var point = new Vector3(node.Point[0], 0, node.Point[1]);
+            Debug.DrawLine(point + Vector3.up * yMin, point + Vector3.up * yMax, wireFrameColor);
+            if (node.LeftChild != null)
+            {
+                var pointC = new Vector3(node.LeftChild.Point[0], 0, node.LeftChild.Point[1]);
+                Debug.DrawLine(point + Vector3.up * yMin, pointC + Vector3.up * yMin, wireFrameColor);
+                Debug.DrawLine(point + Vector3.up * yMax, pointC + Vector3.up * yMax, wireFrameColor);
+            }
+            if (node.RightChild != null)
+            {
+                var pointC = new Vector3(node.RightChild.Point[0], 0, node.RightChild.Point[1]);
+                Debug.DrawLine(point + Vector3.up * yMin, pointC + Vector3.up * yMin, wireFrameColor);
+                Debug.DrawLine(point + Vector3.up * yMax, pointC + Vector3.up * yMax, wireFrameColor);
+            }
+        }
+    }
 
     private void DrawShape(Vector3[] points, float r = 1, float g = 0, float b = 1, float a = 1)
     {
