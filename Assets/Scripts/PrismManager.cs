@@ -16,7 +16,7 @@ public class PrismManager : MonoBehaviour
     private List<Prism> prisms = new List<Prism>();
     private List<GameObject> prismObjects = new List<GameObject>();
     private GameObject prismParent;
-    private Dictionary<Prism,bool> prismColliding = new Dictionary<Prism, bool>();
+    private Dictionary<Prism, bool> prismColliding = new Dictionary<Prism, bool>();
 
     private const float UPDATE_RATE = 0.5f;
 
@@ -59,13 +59,14 @@ public class PrismManager : MonoBehaviour
 
         StartCoroutine(Run());
     }
-    
+
     void Update()
     {
         #region Visualization
 
         DrawPrismRegion();
         DrawPrismWireFrames();
+        DrawBoundingBoxes();
 
 #if UNITY_EDITOR
         if (Application.isFocused)
@@ -127,7 +128,7 @@ public class PrismManager : MonoBehaviour
         var prismB = collision.b;
         var centroidA = prismA.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismA.pointCount;
         var centroidB = prismB.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismB.pointCount;
-        
+
         collision.penetrationDepthVectorAB = new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
 
         return true;
@@ -136,7 +137,7 @@ public class PrismManager : MonoBehaviour
     #endregion
 
     #region Private Functions
-    
+
     private void ResolveCollision(PrismCollision collision)
     {
         var prismObjA = collision.a.prismObject;
@@ -155,10 +156,28 @@ public class PrismManager : MonoBehaviour
 
     #region Visualization Functions
 
+    private void DrawShape(Vector3[] points, float r = 1, float g = 0, float b = 1, float a = 1)
+    {
+        var wireFrameColor = new Color(r, g, b, a);
+        var yMin = -prismRegionRadiusY;
+        var yMax = prismRegionRadiusY;
+
+        foreach (var point in points)
+        {
+            Debug.DrawLine(point + Vector3.up * yMin, point + Vector3.up * yMax, wireFrameColor);
+        }
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            Debug.DrawLine(points[i] + Vector3.up * yMin, points[(i + 1) % points.Length] + Vector3.up * yMin, wireFrameColor);
+            Debug.DrawLine(points[i] + Vector3.up * yMax, points[(i + 1) % points.Length] + Vector3.up * yMax, wireFrameColor);
+        }
+    }
+
     private void DrawPrismRegion()
     {
         var points = new Vector3[] { new Vector3(1, 0, 1), new Vector3(1, 0, -1), new Vector3(-1, 0, -1), new Vector3(-1, 0, 1) }.Select(p => p * prismRegionRadiusXZ).ToArray();
-        
+
         var yMin = -prismRegionRadiusY;
         var yMax = prismRegionRadiusY;
 
@@ -204,8 +223,51 @@ public class PrismManager : MonoBehaviour
 
     #endregion
 
-    #region Utility Classes
 
+    #region Utility Functions
+
+    private Vector3[] BoundingBox(Vector3[] points)
+    {
+        Vector3[] corners = new Vector3[] { points[0], points[0] };
+        for (int i = 1; i < points.Length; i++)
+        {
+            for (int b = 0; b < 3; b += 2)
+            {
+                if (corners[0][b] > points[i][b])
+                    corners[0][b] = points[i][b];
+                else if (corners[1][b] < points[i][b])
+                    corners[1][b] = points[i][b];
+            }
+        }
+        return corners;
+    }
+
+    private Vector3[] Corners2Points(Vector3[] points)
+    {
+        return new Vector3[] {
+            points[0],
+            points[0].x * Vector3.right + points[1].z * Vector3.forward,
+            points[1],
+            points[1].x * Vector3.right + points[0].z * Vector3.forward,
+        };
+    }
+
+    private void DrawBoundingBoxes()
+    {
+        for (int prismIndex = 0; prismIndex < prisms.Count; prismIndex++)
+        {
+            var prism = prisms[prismIndex];
+            var prismTransform = prismObjects[prismIndex].transform;
+            var prismPoints = prism.points.Select(p => prismTransform.position + Quaternion.AngleAxis(prismTransform.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransform.localScale.x, 0, p.z * prismTransform.localScale.z)).ToArray();
+
+            var bbox = BoundingBox(prismPoints);
+            DrawShape(Corners2Points(bbox));
+        }
+    }
+
+    #endregion
+
+    #region Utility Classes
     private class PrismCollision
     {
         public Prism a;
