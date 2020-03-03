@@ -110,7 +110,20 @@ public class PrismManager : MonoBehaviour
     {
         for (int i = 0; i < prisms.Count; i++)
             for (int j = i + 1; j < prisms.Count; j++)
-                if (Vector3.Distance(prismObjects[i].transform.position, prismObjects[j].transform.position) <= 1)
+            {
+                if (prisms[i].points.Length == 0 || prisms[j].points.Length == 0)
+                    continue;
+                var prismI = prisms[i];
+                var prismTransformI = prismObjects[i].transform;
+                var prismPointsI = prismI.points.Select(p => prismTransformI.position + Quaternion.AngleAxis(prismTransformI.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformI.localScale.x, 0, p.z * prismTransformI.localScale.z)).ToArray();
+                var bboxI = BoundingBox(prismPointsI);
+
+                var prismJ = prisms[j];
+                var prismTransformJ = prismObjects[j].transform;
+                var prismPointsJ = prismJ.points.Select(p => prismTransformJ.position + Quaternion.AngleAxis(prismTransformJ.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformJ.localScale.x, 0, p.z * prismTransformJ.localScale.z)).ToArray();
+                var bboxJ = BoundingBox(prismPointsJ);
+
+                if (AreBoxesColliding(bboxI, bboxJ))
                 {
                     var checkPrisms = new PrismCollision();
                     checkPrisms.a = prisms[i];
@@ -118,7 +131,7 @@ public class PrismManager : MonoBehaviour
 
                     yield return checkPrisms;
                 }
-
+            }
         yield break;
     }
 
@@ -250,6 +263,15 @@ public class PrismManager : MonoBehaviour
             points[1],
             points[1].x * Vector3.right + points[0].z * Vector3.forward,
         };
+    }
+
+    private bool AreBoxesColliding(Vector3[] a, Vector3[] b)
+    {
+        // print(a[0]);
+        // print(a[1]);
+        // print(b[0]);
+        // print(b[1]);
+        return a[0].x < b[1].x && a[1].x > b[0].x && a[0].z < b[1].z && a[1].z > b[0].z;
     }
 
     private void DrawBoundingBoxes()
