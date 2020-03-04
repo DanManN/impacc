@@ -155,12 +155,60 @@ public class PrismManager : MonoBehaviour
         yield break;
     }
 
+    // Support functions for building Simplex
+
+    // Ref: https://stackoverflow.com/questions/17386299/get-farthest-vertice-on-a-specified-direction-of-a-3d-model-unity/17407420
+    private Vector3 getFarthestPointInDirection(Prism shape, Vector3 direction)
+    {
+        Vector3 farthestPoint = shape.points[0];
+        float farDistance = 0f;
+
+        foreach(Vector3 vert in shape.points)
+        {
+            float tmp = Vector3.Dot(direction,vert);
+            if(tmp > farDistance)
+            {
+                farDistance = tmp;
+                farthestPoint = vert;
+            }
+        }
+
+        return farthestPoint;
+    }
+
+    // Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
+    private Vector3 support(Prism shape1, Prism shape2, Vector3 d) 
+    {
+        // d is a vector direction (doesn't have to be normalized)
+        // get points on the edge of the shapes in opposite directions
+        Vector3 p1 = getFarthestPointInDirection(shape1, d);
+        Vector3 p2 = getFarthestPointInDirection(shape2, -d);
+        // perform the Minkowski Difference
+        Vector3 p3 = p1 - p2;
+        // p3 is now a point in Minkowski space on the edge of the Minkowski Difference
+        return p3;
+    }
+
+    // private Vector3[] createSimplex(Prism shape1, Prism shape2)
+    // {
+    //     var d1 = new Vector3(Random.value);
+    //     var a = support(shape1, shape2, d1);
+    //     var b = support(shape1, shape2, -d1);
+    //     var AB = b - a;
+    //     var AO = Vector3.zero - a;
+    //     var d2 = Vector3.Cross(Vector3.Cross(AB, AO), AB);
+    //     var c = support(shape1, shape2, d2);
+    // }
+
     private bool CheckCollision(PrismCollision collision)
     {
+        // Task 1. Determine whether there is an actual collision using the GJK
         var prismA = collision.a;
         var prismB = collision.b;
         // var centroidA = prismA.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismA.pointCount;
         // var centroidB = prismB.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismB.pointCount;
+        
+        // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         collision.penetrationDepthVectorAB = new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
         // collision.penetrationDepthVectorAB = Vector3.zero;
 
