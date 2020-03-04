@@ -5,14 +5,20 @@ Collision Scene.
 ## PotentialCollisions()
 
 
-- [ ] Borrow KdTree
+- [x] Borrow KdTree and implemented [Daniel]
+
+  (by yanshi) Note: on my computer I have to copy the `KdTree\KdTreeLib` into `Assert`  to make things works. 
+
 - [ ] Draw debug lines
+
 - [ ] Efficiency report
 
 ### CheckCollision()
 
 - [ ] GJK algorithm
+  - [ ] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
 - [ ] penetration depth vector, EPA algorithm
+  - [ ] Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
 
 
 
