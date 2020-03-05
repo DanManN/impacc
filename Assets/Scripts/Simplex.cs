@@ -5,7 +5,7 @@ using System;
 
 using UnityEngine;
 
-public class Simplex : MonoBehaviour
+public class Simplex
 {
     // public int pointCount = 3;
     public List<Vector3> vertices = new List<Vector3>();
