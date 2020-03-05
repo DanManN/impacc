@@ -7,19 +7,22 @@ using UnityEngine;
 
 public class Simplex
 {
-    // public int pointCount = 3;
-    public List<Vector3> vertices = new List<Vector3>();
-    private Vector3 ORIGIN = Vector3.zero;
-    // public Vector3[] vertices;
-    // public float midY, height;
 
     // TODO: Not yet implemented 3D version
 
-    public GameObject simplexObject;
+    public List<Vector3> vertices;
+    private Vector3 ORIGIN = Vector3.zero;
+    // public GameObject simplexObject;
+
+    public Simplex()
+    {
+        vertices = new List<Vector3>();
+    }
 
     public void add(Vector3 point)
     {
         vertices.Add(point);
+        Debug.Log("Add Point" + point);
     }
 
     public Vector3 getB()
@@ -37,10 +40,10 @@ public class Simplex
         // return vertices.Last();
     }
 
-    public bool contains(Vector3 point)
-    {
-        return vertices.Contains(point);
-    }
+    // public bool contains(Vector3 point)
+    // {
+    //     return vertices.Contains(point);
+    // }
 
     private Vector3 tripleProduct(Vector3 a, Vector3 b, Vector3 c)
     {
