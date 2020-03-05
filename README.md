@@ -22,7 +22,9 @@ Collision Scene.
     - [x] support
     - [x] getFarthestPointInDirection
     - [x] containsOrigin
-  - [ ] Test
+  - [x] Test
+  - [ ] Some further test like visualization and  adding debug line, etc.
+  - [ ] Some 3D related stuffs not solved yet.
 - [ ] penetration depth vector, EPA algorithm
   - [ ] Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
 
