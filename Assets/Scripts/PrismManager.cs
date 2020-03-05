@@ -243,7 +243,10 @@ public class PrismManager : MonoBehaviour
         // var centroidB = prismB.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismB.pointCount;
         
         // GJK Collision
-        bool isCollide = GJK_collision(prismA, prismB);
+        bool isCollide = true;
+        
+        // Will Stuck the Unity...................... Need further test and fix.
+        // bool isCollide = GJK_collision(prismA, prismB);
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         
