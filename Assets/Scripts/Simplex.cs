@@ -25,6 +25,11 @@ public class Simplex
         Debug.Log("Add Point" + point);
     }
 
+    public Vector3 get(int i)
+    {
+        return vertices[i];
+    }
+
     public Vector3 getB()
     {
         return vertices[vertices.Count - 2];

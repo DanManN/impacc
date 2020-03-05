@@ -25,6 +25,9 @@ public class PrismManager : MonoBehaviour
 
     private KdTree.KdTree<float, int> ktree = null;
 
+
+    public double TOLERANCE = 0.00001;
+
     #region Unity Functions
 
     void Start()
@@ -190,7 +193,7 @@ public class PrismManager : MonoBehaviour
         return p3;
     }
 
-    private bool GJK_collision(Prism A, Prism B)
+    private Simplex GJK_collision(Prism A, Prism B)
     {
         Simplex simplex = new Simplex();
 
@@ -213,7 +216,7 @@ public class PrismManager : MonoBehaviour
                 // if the point added last was not past the origin in the direction of d
                 // then the Minkowski Sum cannot possibly contain the origin since
                 // the last point added is on the edge of the Minkowski Difference
-                return false;
+                return null;
             } else 
             {
                 // otherwise we need to determine if the origin is in
@@ -221,7 +224,7 @@ public class PrismManager : MonoBehaviour
                 if (simplex.containsOrigin(d)) 
                 {
                     // if it does then we know there is a collision
-                    return true;
+                    return simplex;
                 } else {
                     // otherwise we cannot be certain so find the edge who is
                     // closest to the origin and use its normal (in the direction
@@ -232,12 +235,72 @@ public class PrismManager : MonoBehaviour
         }
     }
 
-    // TODO TODO TODO TODO TODO
-    private Vector3 EPA_pd()
+
+    // Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
+    private (double, Vector3, int) findClosestEdge(Simplex simplex)
+    {
+        Tuple<Vector3, Vector3> closest = null;
+
+        double closest_dist = double.MaxValue;
+        Vector3 closest_norm = null;
+        int closest_index = -1;
+
+        for (int i = 0; i < simplex.vertices.Count; i++)
+        {
+            int j = i + 1 == simplex.vertices.Count ? 0 : i + 1;
+
+            Vector3 a = simplex.get(i);
+            Vector3 b = simplex.get(j);
+
+            Vector3 edge = b - a;
+
+            // vector from edge toward origin
+            Vector3 n = Vector3.Cross(Vector3.Cross(edge, a), edge);
+
+            n.Normalize();
+
+            double dist_origin_edge = Vector3.Dot(n, a);
+
+            if (dist_origin_edge < closest_dist)
+            {
+                closest_dist = dist_origin_edge;
+                closest_norm = n;
+                closest_index = j;
+            }
+
+        }
+
+        return (closest_dist, closest_norm, closest_index;
+    }
+
+
+    private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
     {
         // Place holder: Draw an random line
         // return Vector3.zero;
+
+        while (true)
+        {
+            (double dist, Vector3 norm, int index) = findClosestEdge(simplex);
+
+            Vector3 p = support(A, B, norm);
+
+            float d = Vector3.Dot(p, norm);
+
+            if (d - dist < TOLERANCE)
+            {
+                return (norm * d);
+            }
+
+            else
+            {
+                // fix this
+                simplex.insert(p, index);
+            }
+        }
+
         return new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
+
     }
 
     private bool CheckCollision(PrismCollision collision)
@@ -250,14 +313,14 @@ public class PrismManager : MonoBehaviour
         // bool isCollide = true;
 
         // Oho Yeah it's working now!
-        bool isCollide = GJK_collision(prismA, prismB);
+        Simplex isCollide = GJK_collision(prismA, prismB);
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
         var pd = Vector3.zero;
-        if (isCollide)
+        if (isCollide != null)
         {
-            pd = EPA_pd();
+            pd = EPA_pd(prismA, prismB, isCollide);
         }
         collision.penetrationDepthVectorAB = pd;
 
