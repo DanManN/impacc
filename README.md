@@ -15,6 +15,16 @@ Collision Scene.
 
 ### CheckCollision()
 
+Note:
+
+Currently if I make Simple initialized as a global variable
+
+```
+Simplex simplex = new Simplex();
+```
+
+Unity will just stuck. Don't know why but it need to be fixed s.t. the simplex can be used in EPA
+
 - [x] GJK algorithm [Yanshi]
   - [x] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
   - [x] GJK_collision

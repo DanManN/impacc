@@ -174,7 +174,7 @@ public class PrismManager : MonoBehaviour
                 farthestPoint = vert;
             }
         }
-        Debug.Log("farthestPoint: " + farthestPoint);
+        // Debug.Log("farthestPoint: " + farthestPoint);
 
         return farthestPoint;
     }
@@ -194,6 +194,7 @@ public class PrismManager : MonoBehaviour
 
     private bool GJK_collision(Prism A, Prism B)
     {
+        // Make this as a global variable will cause stuck in Unity (IDK why though...)
         Simplex simplex = new Simplex();
 
         Vector3 ORIGIN = Vector3.zero;
