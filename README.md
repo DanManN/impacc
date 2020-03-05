@@ -15,8 +15,14 @@ Collision Scene.
 
 ### CheckCollision()
 
-- [ ] GJK algorithm
-  - [ ] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
+- [x] GJK algorithm [Yanshi]
+  - [x] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
+  - [x] GJK_collision
+    - [x] createSimplex
+    - [x] support
+    - [x] getFarthestPointInDirection
+    - [x] containsOrigin
+  - [ ] Test
 - [ ] penetration depth vector, EPA algorithm
   - [ ] Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
 
