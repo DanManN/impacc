@@ -21,8 +21,6 @@ public class PrismManager : MonoBehaviour
     private GameObject prismParent;
     private Dictionary<Prism, bool> prismColliding = new Dictionary<Prism, bool>();
 
-    private Simplex simplex = new Simplex();
-
     private const float UPDATE_RATE = 0.5f;
 
     private KdTree.KdTree<float, int> ktree = null;
@@ -174,6 +172,7 @@ public class PrismManager : MonoBehaviour
                 farthestPoint = vert;
             }
         }
+        Debug.Log("farthestPoint: " + farthestPoint);
 
         return farthestPoint;
     }
@@ -193,6 +192,8 @@ public class PrismManager : MonoBehaviour
 
     private bool GJK_collision(Prism A, Prism B)
     {
+        Simplex simplex = new Simplex();
+
         Vector3 ORIGIN = Vector3.zero;
         // choose a search direction
         Vector3 d = new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
@@ -202,31 +203,36 @@ public class PrismManager : MonoBehaviour
         d = -d;
         // start looping
         while (true) {
-        // add a new point to the simplex because we haven't terminated yet
-        simplex.add(support(A, B, d));
-        // make sure that the last point we added actually passed the origin
-        var lastVert = simplex.getLast();
-        if (Vector3.Dot(lastVert, d) <= 0) {
-            // if the point added last was not past the origin in the direction of d
-            // then the Minkowski Sum cannot possibly contain the origin since
-            // the last point added is on the edge of the Minkowski Difference
-            return false;
-        } else {
-            // otherwise we need to determine if the origin is in
-            // the current simplex
-            if (simplex.contains(ORIGIN)) {
-            // if it does then we know there is a collision
-            return true;
-            } else {
-            // otherwise we cannot be certain so find the edge who is
-            // closest to the origin and use its normal (in the direction
-            // of the origin) as the new d and continue the loop
-            d = simplex.getDirection();
+            Debug.Log("Test...");
+            // add a new point to the simplex because we haven't terminated yet
+            simplex.add(support(A, B, d));
+            // make sure that the last point we added actually passed the origin
+            var lastVert = simplex.getLast();
+            if (Vector3.Dot(lastVert, d) <= 0) 
+            {
+                // if the point added last was not past the origin in the direction of d
+                // then the Minkowski Sum cannot possibly contain the origin since
+                // the last point added is on the edge of the Minkowski Difference
+                return false;
+            } else 
+            {
+                // otherwise we need to determine if the origin is in
+                // the current simplex
+                if (simplex.containsOrigin(d)) 
+                {
+                    // if it does then we know there is a collision
+                    return true;
+                } else {
+                    // otherwise we cannot be certain so find the edge who is
+                    // closest to the origin and use its normal (in the direction
+                    // of the origin) as the new d and continue the loop
+                    d = simplex.getDirection();
+                }
             }
-        }
         }
     }
 
+    // TODO TODO TODO TODO TODO
     private Vector3 EPA_pd()
     {
         // Place holder: Draw an random line
@@ -239,18 +245,14 @@ public class PrismManager : MonoBehaviour
         // Task 1. Determine whether there is an actual collision using the GJK
         var prismA = collision.a;
         var prismB = collision.b;
-        // var centroidA = prismA.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismA.pointCount;
-        // var centroidB = prismB.points.Aggregate(Vector3.zero, (a, b) => a + b) / prismB.pointCount;
-        
+
         // GJK Collision
-        bool isCollide = true;
-        
-        // Will Stuck the Unity...................... Need further test and fix.
-        // bool isCollide = GJK_collision(prismA, prismB);
+        // bool isCollide = true;
+
+        // Oho Yeah it's working now!
+        bool isCollide = GJK_collision(prismA, prismB);
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
-        
-
         // EPA calculate penetration depth:
         var pd = Vector3.zero;
         if (isCollide)
