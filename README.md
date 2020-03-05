@@ -15,15 +15,19 @@ Collision Scene.
 
 ### CheckCollision()
 
-Note:
+~~Note:~~
 
-Currently if I make Simple initialized as a global variable
+~~Currently if I make Simple initialized as a global variable~~
 
 ```
 Simplex simplex = new Simplex();
 ```
 
-Unity will just stuck. Don't know why but it need to be fixed s.t. the simplex can be used in EPA
+~~Unity will just stuck. Don't know why but it need to be fixed s.t. the simplex can be used in EPA~~
+
+**Solved:**  Indeed should not be a global variable. For each collision, create a new simplex and store Minkowski Sum.
+
+
 
 - [x] GJK algorithm [Yanshi]
   - [x] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
