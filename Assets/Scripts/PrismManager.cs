@@ -9,10 +9,10 @@ using KdTree.Math;
 public class PrismManager : MonoBehaviour
 {
     public int prismCount = 10;
-    public float prismRegionRadiusXZ = 5;
-    public float prismRegionRadiusY = 5;
-    public float maxPrismScaleXZ = 5;
-    public float maxPrismScaleY = 5;
+    public float prismRegionRadiusXZ = 10;
+    public float prismRegionRadiusY = 10;
+    public float maxPrismScaleXZ = 10;
+    public float maxPrismScaleY = 10;
     public GameObject regularPrismPrefab;
     public GameObject irregularPrismPrefab;
 
@@ -170,10 +170,10 @@ public class PrismManager : MonoBehaviour
         Vector3 farthestPoint = shape.points[0];
         float farDistance = 0f;
 
-        foreach(Vector3 vert in shape.points)
+        foreach (Vector3 vert in shape.points)
         {
-            float tmp = Vector3.Dot(direction,vert);
-            if(tmp > farDistance)
+            float tmp = Vector3.Dot(direction, vert);
+            if (tmp > farDistance)
             {
                 farDistance = tmp;
                 farthestPoint = vert;
@@ -185,7 +185,7 @@ public class PrismManager : MonoBehaviour
     }
 
     // Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
-    private Vector3 support(Prism shape1, Prism shape2, Vector3 d) 
+    private Vector3 support(Prism shape1, Prism shape2, Vector3 d)
     {
         // d is a vector direction (doesn't have to be normalized)
         // get points on the edge of the shapes in opposite directions
@@ -207,27 +207,31 @@ public class PrismManager : MonoBehaviour
         // negate d for the next point
         d = -d;
         // start looping
-        while (true) {
+        while (true)
+        {
             Debug.Log("Test...");
             // add a new point to the simplex because we haven't terminated yet
             simplex.add(support(A, B, d));
             // make sure that the last point we added actually passed the origin
             var lastVert = simplex.getLast();
-            if (Vector3.Dot(lastVert, d) <= 0) 
+            if (Vector3.Dot(lastVert, d) <= 0)
             {
                 // if the point added last was not past the origin in the direction of d
                 // then the Minkowski Sum cannot possibly contain the origin since
                 // the last point added is on the edge of the Minkowski Difference
                 return null;
-            } else 
+            }
+            else
             {
                 // otherwise we need to determine if the origin is in
                 // the current simplex
-                if (simplex.containsOrigin(d)) 
+                if (simplex.containsOrigin(d))
                 {
                     // if it does then we know there is a collision
                     return simplex;
-                } else {
+                }
+                else
+                {
                     // otherwise we cannot be certain so find the edge who is
                     // closest to the origin and use its normal (in the direction
                     // of the origin) as the new d and continue the loop
@@ -319,20 +323,19 @@ public class PrismManager : MonoBehaviour
             collision.penetrationDepthVectorAB = EPA_pd(prismA, prismB, gjk_simp);
             Debug.Log("collision");
             return true;
-            
 
-        }        
+
+        }
         else
         {
             Debug.Log("no collision");
             return false;
         }
     }
-    
+
     #endregion
 
     #region Private Functions
-
     private void ResolveCollision(PrismCollision collision)
     {
         var prismObjA = collision.a.prismObject;
@@ -341,16 +344,23 @@ public class PrismManager : MonoBehaviour
         var pushA = -collision.penetrationDepthVectorAB / 2;
         var pushB = collision.penetrationDepthVectorAB / 2;
 
-        prismObjA.transform.position += pushA;
-        prismObjB.transform.position += pushB;
+        // prismObjA.transform.position += pushA;
+        // prismObjB.transform.position += pushB;
+        for (int i = 0; i < collision.a.pointCount; i++)
+        {
+            collision.a.points[i] += pushA;
+        }
+        for (int i = 0; i < collision.b.pointCount; i++)
+        {
+            collision.b.points[i] += pushB;
+        }
 
         Debug.DrawLine(prismObjA.transform.position, prismObjA.transform.position + collision.penetrationDepthVectorAB, Color.cyan, UPDATE_RATE);
     }
-    
+
     #endregion
 
     #region Visualization Functions
-
     private void DrawTree(float r = 0, float g = 0, float b = 1, float a = 1)
     {
         if (ktree == null) return;
@@ -501,12 +511,13 @@ public class PrismManager : MonoBehaviour
         public Vector3 penetrationDepthVectorAB;
     }
 
-    private class Tuple<K,V>
+    private class Tuple<K, V>
     {
         public K Item1;
         public V Item2;
 
-        public Tuple(K k, V v) {
+        public Tuple(K k, V v)
+        {
             Item1 = k;
             Item2 = v;
         }
