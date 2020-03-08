@@ -2,7 +2,13 @@
 
 Collision Scene.
 
-## PotentialCollisions()
+
+
+## 2. Git Log
+
+See log.txt
+
+## 4. PotentialCollisions()
 
 
 - [x] Borrow KdTree and implemented [Daniel]
@@ -13,27 +19,14 @@ Collision Scene.
 
 - [ ] Efficiency report
 
-### CheckCollision()
-
-~~Note:~~
-
-~~Currently if I make Simple initialized as a global variable~~
-
-```
-Simplex simplex = new Simplex();
-```
-
-~~Unity will just stuck. Don't know why but it need to be fixed s.t. the simplex can be used in EPA~~
-
-**Solved:**  Indeed should not be a global variable. For each collision, create a new simplex and store Minkowski Sum.
-
-
+### 5. CheckCollision()
 
 - [x] GJK algorithm [Yanshi]
   - [x] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
   - [x] GJK_collision
     - [x] createSimplex
-    - [x] support
+      - [x] support class Simplex
+    - [x] support (Get a direction to get vertex from Minkowski Sum)
     - [x] getFarthestPointInDirection
     - [x] containsOrigin
   - [x] Test
