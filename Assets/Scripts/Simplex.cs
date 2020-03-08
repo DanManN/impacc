@@ -25,6 +25,12 @@ public class Simplex
         Debug.Log("Add Point" + point);
     }
 
+    public void insert(int index, Vector3 point)
+    {
+        vertices.Insert(index, point);
+
+    }
+
     public Vector3 get(int i)
     {
         return vertices[i];

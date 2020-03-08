@@ -194,7 +194,8 @@ public class PrismManager : MonoBehaviour
     }
 
 
-    private bool GJK_collision(Prism A, Prism B, Simplex simplex)
+
+    private Simplex GJK_collision(Prism A, Prism B, Simplex simplex)
     {
         Vector3 ORIGIN = Vector3.zero;
         // choose a search direction
@@ -234,40 +235,62 @@ public class PrismManager : MonoBehaviour
         }
     }
 
-
     // Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
     private Vector3 EPA_pd(Simplex simplex)
     {
-        // // loop to find the collision information
-        // while (true) 
-        // {
-        //     // obtain the feature (edge for 2D) closest to the 
-        //     // origin on the Minkowski Difference
-        //     Edge e = findClosestEdge(s);
-        //     // obtain a new support point in the direction of the edge normal
-        //     Vector3 p = support(A, B, e.normal);
-        //     // check the distance from the origin to the edge against the
-        //     // distance p is along e.normal
-        //     double d = p.dot(e.normal);
-        //     if (d - e.distance < TOLERANCE) {
-        //         // the tolerance should be something positive close to zero (ex. 0.00001)
+        double closest_dist = double.MaxValue;
+        Vector3 closest_norm = Vector3.zero;
+        int closest_index = -1;
 
-        //         // if the difference is less than the tolerance then we can
-        //         // assume that we cannot expand the simplex any further and
-        //         // we have our solution
-        //         normal = e.normal;
-        //         depth = d;
-        //     } else {
-        //         // we haven't reached the edge of the Minkowski Difference
-        //         // so continue expanding by adding the new point to the simplex
-        //         // in between the points that made the closest edge
-        //         simplex.insert(p, e.index);
-        //     }
-        // }
+        for (int i = 0; i < simplex.vertices.Count; i++)
+        {
+            int j = i + 1 == simplex.vertices.Count ? 0 : i + 1;
 
-        // Place holder: Draw an random line
+            Vector3 a = simplex.get(i);
+            Vector3 b = simplex.get(j);
 
-        return new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
+            Vector3 edge = b - a;
+
+            // vector from edge toward origin
+            Vector3 n = Vector3.Cross(Vector3.Cross(edge, a), edge);
+
+            n.Normalize();
+
+            double dist_origin_edge = Vector3.Dot(n, a);
+
+            if (dist_origin_edge < closest_dist)
+            {
+                closest_dist = dist_origin_edge;
+                closest_norm = n;
+                closest_index = j;
+            }
+
+        }
+
+        return (closest_dist, closest_norm, closest_index);
+    }
+
+
+    private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
+    {
+        while (true)
+        {
+            (double dist, Vector3 norm, int index) = findClosestEdge(simplex);
+
+            Vector3 p = support(A, B, norm);
+
+            float d = Vector3.Dot(p, norm);
+
+            if (d - dist < TOLERANCE)
+            {
+                return (norm * d);
+            }
+
+            else
+            {
+                simplex.insert(index, p);
+            }
+        }
 
     }
 
@@ -285,19 +308,21 @@ public class PrismManager : MonoBehaviour
 
         // Oho Yeah it's working now!
 
-        bool isCollide = GJK_collision(prismA, prismB, simplex);
+        Simplex gjk_simp = GJK_collision(prismA, prismB, simplex);
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
         var pd = Vector3.zero;
-        if (isCollide != null)
+        if (gjk_simp != null)
         {
 
-            pd = EPA_pd(simplex);
+            pd = EPA_pd(prismA, prismB, gjk_simp);
         }
         collision.penetrationDepthVectorAB = pd;
 
-        return isCollide;
+        bool isCollision = pd == Vector3.zero ? false : true;
+
+        return isCollision;
     }
     
     #endregion
