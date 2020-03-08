@@ -128,6 +128,8 @@ public class PrismManager : MonoBehaviour
                 ktree.Add(new[] { point.x, point.z }, i);
         }
 
+        print(prisms.Count);
+
         for (int i = 0; i < prisms.Count; i++)
         {
             if (prisms[i].points.Length == 0)
@@ -136,7 +138,7 @@ public class PrismManager : MonoBehaviour
             var prismTransformI = prismObjects[i].transform;
             var bboxI = BoundingBox(prismI.points);
             float radius = Vector3.Distance(bboxI[0], bboxI[1]) / 2;
-            print(radius);
+            //print(radius);
             float[] position = new float[] { prismTransformI.position.x, prismTransformI.position.z };
             foreach (KdTree.KdTreeNode<float, int> node in ktree.RadialSearch(position, radius))
             {
@@ -150,6 +152,8 @@ public class PrismManager : MonoBehaviour
                     var checkPrisms = new PrismCollision();
                     checkPrisms.a = prisms[i];
                     checkPrisms.b = prisms[j];
+
+                    print("in here");
 
                     yield return checkPrisms;
                 }
@@ -193,8 +197,6 @@ public class PrismManager : MonoBehaviour
         return p3;
     }
 
-
-
     private Simplex GJK_collision(Prism A, Prism B, Simplex simplex)
     {
         Vector3 ORIGIN = Vector3.zero;
@@ -236,7 +238,7 @@ public class PrismManager : MonoBehaviour
     }
 
     // Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
-    private Vector3 EPA_pd(Simplex simplex)
+    private (double, Vector3, int) findClosestEdge(Simplex simplex)
     {
         double closest_dist = double.MaxValue;
         Vector3 closest_norm = Vector3.zero;
@@ -270,7 +272,6 @@ public class PrismManager : MonoBehaviour
         return (closest_dist, closest_norm, closest_index);
     }
 
-
     private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
     {
         while (true)
@@ -288,6 +289,7 @@ public class PrismManager : MonoBehaviour
 
             else
             {
+                Debug.Log("in EPA loop");
                 simplex.insert(index, p);
             }
         }
@@ -296,33 +298,35 @@ public class PrismManager : MonoBehaviour
 
     private bool CheckCollision(PrismCollision collision)
     {
+
+        Debug.Log("beginning of check collision");
         // Task 1. Determine whether there is an actual collision using the GJK
         var prismA = collision.a;
         var prismB = collision.b;
 
-        // GJK Collision
-        // bool isCollide = true;
-
         // For each collision, create a simplex to calculate Minkowski sum
-        Simplex simplex = new Simplex();
+        //Simplex simplex = new Simplex();
 
         // Oho Yeah it's working now!
 
-        Simplex gjk_simp = GJK_collision(prismA, prismB, simplex);
+        Simplex gjk_simp = GJK_collision(prismA, prismB, new Simplex());
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
-        var pd = Vector3.zero;
         if (gjk_simp != null)
         {
 
-            pd = EPA_pd(prismA, prismB, gjk_simp);
+            collision.penetrationDepthVectorAB = EPA_pd(prismA, prismB, gjk_simp);
+            Debug.Log("collision");
+            return true;
+            
+
+        }        
+        else
+        {
+            Debug.Log("no collision");
+            return false;
         }
-        collision.penetrationDepthVectorAB = pd;
-
-        bool isCollision = pd == Vector3.zero ? false : true;
-
-        return isCollision;
     }
     
     #endregion
