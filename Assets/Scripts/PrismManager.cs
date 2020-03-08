@@ -317,21 +317,35 @@ public class PrismManager : MonoBehaviour
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
-        if (gjk_simp != null)
-        {
+        // if (gjk_simp != null)
+        // {
 
-            collision.penetrationDepthVectorAB = EPA_pd(prismA, prismB, gjk_simp);
-            Debug.Log("collision");
-            return true;
+        //     collision.penetrationDepthVectorAB = EPA_pd(prismA, prismB, gjk_simp);
+        //     Debug.Log("collision");
+        //     return true;
 
 
-        }
-        else
-        {
-            Debug.Log("no collision");
-            return false;
-        }
+        // }
+        // else
+        // {
+        //     Debug.Log("no collision");
+        //     return false;
+        // }
+        collision.penetrationDepthVectorAB = Vector3.zero;
+
+        return true;
     }
+    // =========== Sam's Prototype code =================
+    // private bool CheckCollision(PrismCollision collision)
+    // {
+    //     var prismA = collision.a;
+    //     var prismB = collision.b;
+
+        
+    //     collision.penetrationDepthVectorAB = Vector3.zero;
+
+    //     return true;
+    // }
 
     #endregion
 
