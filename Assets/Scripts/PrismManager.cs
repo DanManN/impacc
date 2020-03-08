@@ -195,7 +195,7 @@ public class PrismManager : MonoBehaviour
         return p3;
     }
 
-    private Simplex GJK_collision(Prism A, Prism B)
+    private Simplex GJK_collision(Prism A, Prism B, Simplex simplex)
     {
         Vector3 ORIGIN = Vector3.zero;
         // choose a search direction
@@ -238,10 +238,9 @@ public class PrismManager : MonoBehaviour
     // Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
     private (double, Vector3, int) findClosestEdge(Simplex simplex)
     {
-        Tuple<Vector3, Vector3> closest = null;
 
         double closest_dist = double.MaxValue;
-        Vector3 closest_norm = null;
+        Vector3 closest_norm = Vector3.zero;
         int closest_index = -1;
 
         for (int i = 0; i < simplex.vertices.Count; i++)
@@ -275,36 +274,6 @@ public class PrismManager : MonoBehaviour
 
     private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
     {
-        // // loop to find the collision information
-        // while (true) 
-        // {
-        //     // obtain the feature (edge for 2D) closest to the 
-        //     // origin on the Minkowski Difference
-        //     Edge e = findClosestEdge(s);
-        //     // obtain a new support point in the direction of the edge normal
-        //     Vector3 p = support(A, B, e.normal);
-        //     // check the distance from the origin to the edge against the
-        //     // distance p is along e.normal
-        //     double d = p.dot(e.normal);
-        //     if (d - e.distance < TOLERANCE) {
-        //         // the tolerance should be something positive close to zero (ex. 0.00001)
-
-        //         // if the difference is less than the tolerance then we can
-        //         // assume that we cannot expand the simplex any further and
-        //         // we have our solution
-        //         normal = e.normal;
-        //         depth = d;
-        //     } else {
-        //         // we haven't reached the edge of the Minkowski Difference
-        //         // so continue expanding by adding the new point to the simplex
-        //         // in between the points that made the closest edge
-        //         simplex.insert(p, e.index);
-        //     }
-        // }
-
-        // Place holder: Draw an random line
-        // return Vector3.zero;
-
         while (true)
         {
             (double dist, Vector3 norm, int index) = findClosestEdge(simplex);
@@ -320,12 +289,9 @@ public class PrismManager : MonoBehaviour
 
             else
             {
-                // fix this
-                simplex.insert(p, index);
+                simplex.insert(index, p);
             }
         }
-
-        return new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
 
     }
 
@@ -342,18 +308,20 @@ public class PrismManager : MonoBehaviour
         Simplex simplex = new Simplex();
 
         // Oho Yeah it's working now!
-        Simplex isCollide = GJK_collision(prismA, prismB);
+        Simplex gjk_simp = GJK_collision(prismA, prismB, simplex);
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
         var pd = Vector3.zero;
-        if (isCollide != null)
+        if (gjk_simp != null)
         {
-            pd = EPA_pd(prismA, prismB, isCollide);
+            pd = EPA_pd(prismA, prismB, gjk_simp);
         }
         collision.penetrationDepthVectorAB = pd;
 
-        return isCollide;
+        bool isCollision = pd == Vector3.zero ? false : true;
+
+        return isCollision;
     }
 
     #endregion
