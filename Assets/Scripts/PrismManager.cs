@@ -128,6 +128,8 @@ public class PrismManager : MonoBehaviour
                 ktree.Add(new[] { point.x, point.z }, i);
         }
 
+        print(prisms.Count);
+
         for (int i = 0; i < prisms.Count; i++)
         {
             if (prisms[i].points.Length == 0)
@@ -137,7 +139,7 @@ public class PrismManager : MonoBehaviour
             var prismPointsI = prismI.points.Select(p => prismTransformI.position + Quaternion.AngleAxis(prismTransformI.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformI.localScale.x, 0, p.z * prismTransformI.localScale.z)).ToArray();
             var bboxI = BoundingBox(prismPointsI);
             float radius = Vector3.Distance(bboxI[0], bboxI[1]) / 2;
-            print(radius);
+            //print(radius);
             float[] position = new float[] { prismTransformI.position.x, prismTransformI.position.z };
             foreach (KdTree.KdTreeNode<float, int> node in ktree.RadialSearch(position, radius))
             {
@@ -152,6 +154,8 @@ public class PrismManager : MonoBehaviour
                     var checkPrisms = new PrismCollision();
                     checkPrisms.a = prisms[i];
                     checkPrisms.b = prisms[j];
+
+                    print("in here");
 
                     yield return checkPrisms;
                 }
@@ -168,10 +172,10 @@ public class PrismManager : MonoBehaviour
         Vector3 farthestPoint = shape.points[0];
         float farDistance = 0f;
 
-        foreach(Vector3 vert in shape.points)
+        foreach (Vector3 vert in shape.points)
         {
-            float tmp = Vector3.Dot(direction,vert);
-            if(tmp > farDistance)
+            float tmp = Vector3.Dot(direction, vert);
+            if (tmp > farDistance)
             {
                 farDistance = tmp;
                 farthestPoint = vert;
@@ -183,7 +187,7 @@ public class PrismManager : MonoBehaviour
     }
 
     // Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
-    private Vector3 support(Prism shape1, Prism shape2, Vector3 d) 
+    private Vector3 support(Prism shape1, Prism shape2, Vector3 d)
     {
         // d is a vector direction (doesn't have to be normalized)
         // get points on the edge of the shapes in opposite directions
@@ -205,27 +209,31 @@ public class PrismManager : MonoBehaviour
         // negate d for the next point
         d = -d;
         // start looping
-        while (true) {
+        while (true)
+        {
             Debug.Log("Test...");
             // add a new point to the simplex because we haven't terminated yet
             simplex.add(support(A, B, d));
             // make sure that the last point we added actually passed the origin
             var lastVert = simplex.getLast();
-            if (Vector3.Dot(lastVert, d) <= 0) 
+            if (Vector3.Dot(lastVert, d) <= 0)
             {
                 // if the point added last was not past the origin in the direction of d
                 // then the Minkowski Sum cannot possibly contain the origin since
                 // the last point added is on the edge of the Minkowski Difference
                 return null;
-            } else 
+            }
+            else
             {
                 // otherwise we need to determine if the origin is in
                 // the current simplex
-                if (simplex.containsOrigin(d)) 
+                if (simplex.containsOrigin(d))
                 {
                     // if it does then we know there is a collision
                     return simplex;
-                } else {
+                }
+                else
+                {
                     // otherwise we cannot be certain so find the edge who is
                     // closest to the origin and use its normal (in the direction
                     // of the origin) as the new d and continue the loop
@@ -271,7 +279,6 @@ public class PrismManager : MonoBehaviour
         return (closest_dist, closest_norm, closest_index);
     }
 
-
     private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
     {
         while (true)
@@ -289,6 +296,7 @@ public class PrismManager : MonoBehaviour
 
             else
             {
+                Debug.Log("in EPA loop");
                 simplex.insert(index, p);
             }
         }
@@ -297,31 +305,31 @@ public class PrismManager : MonoBehaviour
 
     private bool CheckCollision(PrismCollision collision)
     {
+
+        Debug.Log("beginning of check collision");
         // Task 1. Determine whether there is an actual collision using the GJK
         var prismA = collision.a;
         var prismB = collision.b;
 
-        // GJK Collision
-        // bool isCollide = true;
-
         // For each collision, create a simplex to calculate Minkowski sum
-        Simplex simplex = new Simplex();
+        //Simplex simplex = new Simplex();
 
         // Oho Yeah it's working now!
-        Simplex gjk_simp = GJK_collision(prismA, prismB, simplex);
+        Simplex gjk_simp = GJK_collision(prismA, prismB, new Simplex());
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
-        var pd = Vector3.zero;
         if (gjk_simp != null)
         {
-            pd = EPA_pd(prismA, prismB, gjk_simp);
+            collision.penetrationDepthVectorAB = EPA_pd(prismA, prismB, gjk_simp);
+            Debug.Log("collision");
+            return true;
         }
-        collision.penetrationDepthVectorAB = pd;
-
-        bool isCollision = pd == Vector3.zero ? false : true;
-
-        return isCollision;
+        else
+        {
+            Debug.Log("no collision");
+            return false;
+        }
     }
 
     #endregion

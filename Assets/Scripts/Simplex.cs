@@ -22,7 +22,7 @@ public class Simplex
     public void add(Vector3 point)
     {
         vertices.Add(point);
-        Debug.Log("Add Point" + point);
+        //Debug.Log("Add Point" + point);
     }
 
     public void insert(int index, Vector3 point)
