@@ -175,7 +175,7 @@ public class PrismManager : MonoBehaviour
                 farthestPoint = vert;
             }
         }
-        Debug.Log("farthestPoint: " + farthestPoint);
+        // Debug.Log("farthestPoint: " + farthestPoint);
 
         return farthestPoint;
     }
@@ -193,10 +193,9 @@ public class PrismManager : MonoBehaviour
         return p3;
     }
 
-    private Simplex GJK_collision(Prism A, Prism B)
-    {
-        Simplex simplex = new Simplex();
 
+    private Simplex GJK_collision(Prism A, Prism B, Simplex simplex)
+    {
         Vector3 ORIGIN = Vector3.zero;
         // choose a search direction
         Vector3 d = new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
@@ -235,14 +234,12 @@ public class PrismManager : MonoBehaviour
         }
     }
 
-
     // Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
     private (double, Vector3, int) findClosestEdge(Simplex simplex)
     {
-        Tuple<Vector3, Vector3> closest = null;
 
         double closest_dist = double.MaxValue;
-        Vector3 closest_norm = null;
+        Vector3 closest_norm = Vector3.zero;
         int closest_index = -1;
 
         for (int i = 0; i < simplex.vertices.Count; i++)
@@ -270,15 +267,12 @@ public class PrismManager : MonoBehaviour
 
         }
 
-        return (closest_dist, closest_norm, closest_index;
+        return (closest_dist, closest_norm, closest_index);
     }
 
 
     private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
     {
-        // Place holder: Draw an random line
-        // return Vector3.zero;
-
         while (true)
         {
             (double dist, Vector3 norm, int index) = findClosestEdge(simplex);
@@ -294,12 +288,9 @@ public class PrismManager : MonoBehaviour
 
             else
             {
-                // fix this
-                simplex.insert(p, index);
+                simplex.insert(index, p);
             }
         }
-
-        return new Vector3((Random.value - 0.5f) * 2, 0, (Random.value - 0.5f) * 2);
 
     }
 
@@ -312,19 +303,24 @@ public class PrismManager : MonoBehaviour
         // GJK Collision
         // bool isCollide = true;
 
+        // For each collision, create a simplex to calculate Minkowski sum
+        Simplex simplex = new Simplex();
+
         // Oho Yeah it's working now!
-        Simplex isCollide = GJK_collision(prismA, prismB);
+        Simplex gjk_simp = GJK_collision(prismA, prismB, simplex);
 
         // Task 2. If there is, compute the penetration depth vector using EPA algorithm
         // EPA calculate penetration depth:
         var pd = Vector3.zero;
-        if (isCollide != null)
+        if (gjk_simp != null)
         {
-            pd = EPA_pd(prismA, prismB, isCollide);
+            pd = EPA_pd(prismA, prismB, gjk_simp);
         }
         collision.penetrationDepthVectorAB = pd;
 
-        return isCollide;
+        bool isCollision = pd == Vector3.zero ? false : true;
+
+        return isCollision;
     }
     
     #endregion
