@@ -2,11 +2,11 @@
 
 Using original version of Collision Scene code
 
-## 2. Git Log
+### 2. Git Log
 
 See log.txt
 
-## 4. PotentialCollisions()
+### 4. PotentialCollisions()
 
 - k-d tree implementation taken from https://github.com:codeandcats/KdTree.git
 
@@ -22,18 +22,18 @@ See log.txt
 
 ### 5. CheckCollision()
 
-- [x] GJK algorithm
-  - [x] Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
-  - [x] GJK_collision
-    - [x] createSimplex
-      - [x] support class Simplex
-    - [x] support (Get a direction to get vertex from Minkowski Sum)
-    - [x] getFarthestPointInDirection
-    - [x] containsOrigin
-- [x] EPA algorithm
-  - [x] http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
-  - [x] penetration depth vector
-  - [x] find closest edge
+- GJK algorithm
+  - Ref: http://www.dyn4j.org/2010/04/gjk-gilbert-johnson-keerthi/
+  - GJK_collision
+    - createSimplex
+      - support class Simplex
+    - support (Get a direction to get vertex from Minkowski Sum)
+    - getFarthestPointInDirection
+    - containsOrigin
+- EPA algorithm
+  - http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
+  - penetration depth vector
+  - find closest edge
 
 
 ### Extra credit
