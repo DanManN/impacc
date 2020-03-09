@@ -26,7 +26,7 @@ public class PrismManager : MonoBehaviour
     private KdTree.KdTree<float, int> ktree = null;
 
 
-    public double TOLERANCE = 0.00001;
+    public float TOLERANCE = 0.00001f;
 
     #region Unity Functions
 
@@ -128,7 +128,7 @@ public class PrismManager : MonoBehaviour
                 ktree.Add(new[] { point.x, point.z }, i);
         }
 
-        print(prisms.Count);
+        // print(prisms.Count);
 
         for (int i = 0; i < prisms.Count; i++)
         {
@@ -139,7 +139,7 @@ public class PrismManager : MonoBehaviour
             var prismPointsI = prismI.points.Select(p => prismTransformI.position + Quaternion.AngleAxis(prismTransformI.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransformI.localScale.x, 0, p.z * prismTransformI.localScale.z)).ToArray();
             var bboxI = BoundingBox(prismPointsI);
             float radius = Vector3.Distance(bboxI[0], bboxI[1]) / 2;
-            //print(radius);
+            // print(radius);
             float[] position = new float[] { prismTransformI.position.x, prismTransformI.position.z };
             foreach (KdTree.KdTreeNode<float, int> node in ktree.RadialSearch(position, radius))
             {
@@ -155,7 +155,7 @@ public class PrismManager : MonoBehaviour
                     checkPrisms.a = prisms[i];
                     checkPrisms.b = prisms[j];
 
-                    print("in here");
+                    // print("in here");
 
                     yield return checkPrisms;
                 }
@@ -172,7 +172,12 @@ public class PrismManager : MonoBehaviour
         Vector3 farthestPoint = shape.points[0];
         float farDistance = 0f;
 
-        foreach (Vector3 vert in shape.points)
+        int prismIndex = shape.name.Last() - '0';
+        var prism = prisms[prismIndex];
+        var prismTransform = prismObjects[prismIndex].transform;
+        var prismPoints = prism.points.Select(p => prismTransform.position + Quaternion.AngleAxis(prismTransform.eulerAngles.y, Vector3.up) * new Vector3(p.x * prismTransform.localScale.x, 0, p.z * prismTransform.localScale.z)).ToArray();
+
+        foreach (Vector3 vert in prismPoints)//shape.points)
         {
             float tmp = Vector3.Dot(direction, vert);
             if (tmp > farDistance)
@@ -253,16 +258,19 @@ public class PrismManager : MonoBehaviour
 
         for (int i = 0; i < simplex.vertices.Count; i++)
         {
-            int j = i + 1 == simplex.vertices.Count ? 0 : i + 1;
+            int j = (i + 1) == simplex.vertices.Count ? 0 : i + 1;
 
             Vector3 a = simplex.get(i);
             Vector3 b = simplex.get(j);
+            // if (a == b)
+            //     continue;
 
             Vector3 edge = b - a;
 
             // vector from edge toward origin
             Vector3 n = Vector3.Cross(Vector3.Cross(edge, a), edge);
 
+            // if (n.normalized.magnitude > TOLERANCE)
             n.Normalize();
 
             double dist_origin_edge = Vector3.Dot(n, a);
@@ -281,13 +289,18 @@ public class PrismManager : MonoBehaviour
 
     private Vector3 EPA_pd(Prism A, Prism B, Simplex simplex)
     {
-        while (true)
+        Vector3 push = Vector3.forward;
+        int maxIter = 100;
+        while (maxIter > 0)
         {
+            maxIter--;
             (double dist, Vector3 norm, int index) = findClosestEdge(simplex);
 
             Vector3 p = support(A, B, norm);
 
             float d = Vector3.Dot(p, norm);
+
+            push = (norm * d);
 
             if (d - dist < TOLERANCE)
             {
@@ -300,6 +313,8 @@ public class PrismManager : MonoBehaviour
                 simplex.insert(index, p);
             }
         }
+        print("TimeOUT!");
+        return push.normalized * TOLERANCE;
 
     }
 
