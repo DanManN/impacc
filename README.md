@@ -1,6 +1,6 @@
 ## README
 
-Collision Scene.
+Using original version of Collision Scene code
 
 ## 2. Git Log
 
@@ -30,11 +30,10 @@ See log.txt
     - [x] support (Get a direction to get vertex from Minkowski Sum)
     - [x] getFarthestPointInDirection
     - [x] containsOrigin
-  - [x] Test
-  - [ ] Some further test like visualization and  adding debug line, etc.
-  - [ ] Some 3D related stuffs not solved yet.
-- [x] penetration depth vector, EPA algorithm
-  - [x] Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
+- [x] EPA algorithm [Ashley]
+  - [x] http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
+  - [x] penetration depth vector
+  - [x] find closest edge
 
 
 ### Extra credit
