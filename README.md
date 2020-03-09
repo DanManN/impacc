@@ -2,22 +2,23 @@
 
 Collision Scene.
 
-
-
 ## 2. Git Log
 
 See log.txt
 
 ## 4. PotentialCollisions()
 
+- k-d tree implementation taken from https://github.com:codeandcats/KdTree.git
 
-- [x] Borrow KdTree and implemented [Daniel]
-
-  (by yanshi) Note: on my computer I have to copy the `KdTree\KdTreeLib` into `Assert`  to make things works. 
-
-- [ ] Draw debug lines
-
-- [ ] Efficiency report
+- Since insertion into k-d tree takes average O(logN) per point and we insert N
+  points, the time to build the k-d tree for all points is average O(NlogN).
+  Then we do queries for nearest neighbors stopping once we leave a circle of
+  radius the diagonal of the bounding box of the polygon. Each such nearest
+  neighbor query takes average O(slogN) time for s found neighbors. The
+  expectation is that s is small compared to N and can be treated as a
+  constant. So when we do N such queries the query time is expected O(NlogN).
+  Thus building and querying for potential collisions takes expected O(NlogN)
+  time in total.
 
 ### 5. CheckCollision()
 
@@ -32,26 +33,10 @@ See log.txt
   - [x] Test
   - [ ] Some further test like visualization and  adding debug line, etc.
   - [ ] Some 3D related stuffs not solved yet.
-- [ ] penetration depth vector, EPA algorithm
-  - [ ] Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
-
-
-
+- [x] penetration depth vector, EPA algorithm
+  - [x] Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
 
 
 ### Extra credit
 
-a. Scratch implement a data structures
-
-
-
 b. Borrow KdTree
-
-
-
-c. 3D collision detection implementation
-
-
-
-d. 3D GJK, EPA implementation
-

@@ -332,7 +332,7 @@ MonoBehaviour:
     type: 3}
   irregularPrismPrefab: {fileID: 2523424855270817504, guid: 08cd34c5797175b4584644dfb0e6a0c0,
     type: 3}
-  TOLERANCE: 0.00001
+  TOLERANCE: 0.001
 --- !u!4 &1608525109
 Transform:
   m_ObjectHideFlags: 0
