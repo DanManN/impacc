@@ -31,7 +31,7 @@ See log.txt
     - getFarthestPointInDirection
     - containsOrigin
 - EPA algorithm
-  - http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
+  - Ref: http://www.dyn4j.org/2010/05/epa-expanding-polytope-algorithm/
   - penetration depth vector
   - find closest edge
 
