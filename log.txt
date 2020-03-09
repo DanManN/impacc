@@ -1,0 +1,23 @@
+76473b8 was Daniel Nakhimovich, 82 seconds ago, message: questions + video
+4e1fec2 was Daniel Nakhimovich, 2 hours ago, message: timeout
+6505f0b was Yanshi Luo, 6 hours ago, message: Update README.md
+52d3833 was ashdunn, 6 hours ago, message: final epa
+f748c33 was ashdunn, 8 hours ago, message: merging and EPA update
+92524f7 was ashdunn, 8 hours ago, message: EPA
+5772e12 was ashdunn, 3 days ago, message: first pass at EPA
+4a4416f was Yanshi Luo, 3 days ago, message: Update Simplex initialization
+4bc2d24 was Yanshi Luo, 3 days ago, message: Update README
+789c5a6 was Yanshi Luo, 4 days ago, message: Update README.md
+75576c2 was Yanshi Luo, 4 days ago, message: GJK Collision Detection working now
+c7a5041 was Yanshi Luo, 4 days ago, message: Comments out GJK and test
+914849e was Yanshi Luo, 4 days ago, message: Update GJK_collision
+c2463b2 was Yanshi Luo, 4 days ago, message: GJK support function
+94bc09b was Yanshi Luo, 4 days ago, message: Create README.md
+a8e1554 was Daniel Nakhimovich, 6 days ago, message: kdtree + potential collisions
+2c220d2 was Daniel Nakhimovich, 6 days ago, message: box collisions
+68e8be2 was Daniel Nakhimovich, 6 days ago, message: draw bounding boxes
+a5c041c was Daniel Nakhimovich, 13 days ago, message: remove ignored files
+c6f0184 was Daniel Nakhimovich, 13 days ago, message: remove ignored files
+bc4e4fe was Samuel S. Sohn, 5 weeks ago, message: added visualization of penetration vector
+739749e was Samuel S. Sohn, 5 weeks ago, message: removed ResolveCollision from Incomplete Functions region
+d8a20a3 was Samuel S. Sohn, 5 weeks ago, message: init commit
